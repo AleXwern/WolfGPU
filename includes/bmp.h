@@ -6,7 +6,7 @@
 /*   By: anystrom <anystrom@hive.fi>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/09/30 12:25:10 by anystrom          #+#    #+#             */
-/*   Updated: 2021/04/28 13:21:28 by anystrom         ###   ########.fr       */
+/*   Updated: 2021/05/01 00:01:37 by anystrom         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,6 +97,6 @@ typedef struct		s_gfx
 	int				y;
 }					t_gfx;
 
-t_gfx		read_bmp(char *file, int fd, int bread);
+t_gfx		read_bmp(const char *file, int fd, int bread);
 
 #endif

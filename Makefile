@@ -6,7 +6,7 @@
 #    By: anystrom <anystrom@hive.fi>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/01/07 12:41:01 by anystrom          #+#    #+#              #
-#    Updated: 2021/04/30 15:43:49 by anystrom         ###   ########.fr        #
+#    Updated: 2021/04/30 23:56:58 by anystrom         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,7 +16,7 @@ FLG = -O3
 SRCFILE = wolf.c fileformat.c gfx.c key_input.c render.c draw.c move.c randenc.c \
 			floor.c randkey.c interact.c util.c anim.c ai.c entity.c cursor.c \
 			bmp_reader.c
-SRCFILE = wolf.c fileformat.c gpu.c render.c
+SRCFILE = wolf.c fileformat.c gpu.c render.c bmp_reader.c gfx.c
 SRC = $(addprefix ./src/,$(SRCFILE))
 LIBFT = ./obj/libft.a
 OBJS = $(SRC:.c=.o)

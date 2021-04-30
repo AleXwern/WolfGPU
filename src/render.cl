@@ -1,9 +1,25 @@
 
+//	***************IMAGE SIZE*****************
+
+#ifndef	HIRES_GFX
+# define IMAGEDIM	256
+# define DOUBLEDIM	512
+# define DOUBLEWID	1024
+# define SIZEL		(256 * 8)
+#else
+# define IMAGEDIM	256
+# define DOUBLEDIM	512
+# define DOUBLEWID	1024
+# define SIZEL		(256 * 8)
+#endif
+
 //	***************STRUCTS*****************
 #if SINGLE_PRECICION == 1
 typedef	float		t_fpint;
+typedef int			t_int;
 #else
 typedef	double		t_fpint;
+typedef long		t_int;
 #endif
 
 typedef struct		s_vector
@@ -17,10 +33,10 @@ typedef struct		s_vector
 
 typedef struct		s_ivector
 {
-	int				x;
-	int				y;
+	t_int			x;
+	t_int			y;
 #ifdef			IS3D
-	int				z;
+	t_int			z;
 #endif
 }					t_ivector;
 
@@ -41,6 +57,7 @@ typedef struct		s_raycast
 	int				start;
 	int				end;
 	int				side;
+	int				x;
 	uint			color;
 	t_vector		pos;
 	t_fpint			camx;
@@ -50,6 +67,13 @@ typedef struct		s_raycast
 	t_ivector		map;
 	t_ivector		step;
 }					t_raycast;
+
+typedef struct		s_draw
+{
+	int				texnum;
+	t_fpint			wallx;
+	t_ivector		tex;
+}					t_draw;
 
 //  ****************FUNCTIONS******************
 
@@ -146,16 +170,54 @@ uint	side_check(t_raycast *ray)
 		return (0xff6a3396);
 }
 
-void			wall_stripe(t_raycast *ray, __global t_render *render, __global uint *screen, int x)
+void			wall_stripe(
+		t_raycast *ray,
+		__global t_render *render,
+		__global uint *screen,
+		__global uint *gfx,
+		__global char *area)
 {
+	t_draw		draw;
+
+	if (render->texbool)
+	{
+		draw.texnum = area[ray->map.y * 25 + ray->map.x];
+		if (ray->side % 2 == 1)
+			draw.wallx = render->pos.x + ray->walldist * ray->rayd.x;
+		else
+			draw.wallx = render->pos.y + ray->walldist * ray->rayd.y;
+		draw.wallx -= (int)draw.wallx;
+		draw.tex.x = (int)(draw.wallx * 256.0);
+		if (ray->side % 2 == 0 && ray->rayd.x > 0)
+			draw.tex.x = IMAGEDIM - draw.tex.x - 1;
+		else if (ray->side % 2 == 1 && ray->rayd.y < 0)
+			draw.tex.x = IMAGEDIM - draw.tex.x - 1;
+	}
 	while (ray->start <= ray->end)
 	{
-		screen[render->maxx * ray->start + x] = ray->color;
+		if (render->texbool)
+		{
+			draw.tex.y = (((ray->start * DOUBLEDIM - render->maxy * IMAGEDIM +
+				ray->lineh * IMAGEDIM) * IMAGEDIM) / ray->lineh) / DOUBLEDIM;
+			if (draw.tex.y < 0)
+				draw.tex.y *= -1;
+			ray->color = gfx[
+				draw.tex.y % IMAGEDIM * SIZEL / 4 +
+				draw.tex.x % IMAGEDIM
+			];
+			if (ray->side > 1)
+				ray->color = (ray->color >> 1) & 0x7f7f7f;
+		}
+		screen[render->maxx * ray->start + ray->x] = ray->color;
 		ray->start++;
 	}
 }
 
-__kernel void	render(__global uint *screen, __global t_render *render, __global char *area)
+__kernel void	render(
+		__global uint *screen, 
+		__global t_render *render, 
+		__global char *area,
+		__global uint *gfx)
 {
 	t_raycast	ray;
 	int			x;
@@ -173,9 +235,10 @@ __kernel void	render(__global uint *screen, __global t_render *render, __global 
 		ray.start = 0;
 	if (ray.end >= render->maxy)
 		ray.end = render->maxy - 1;
+	ray.x = x;
 	for (int i = 0; i < ray.start; i++)	//ceiling
 		screen[i * render->maxx + x] = 0xff04EEFE;
-	wall_stripe(&ray, render, screen, x);
+	wall_stripe(&ray, render, screen, gfx, area);
 	for (int i = ray.end; i < render->maxy; i++)	//ceiling
 		screen[i * render->maxx + x] = 0xff03B30A;
 }

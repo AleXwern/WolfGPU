@@ -6,7 +6,7 @@
 /*   By: anystrom <anystrom@hive.fi>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/09/30 12:16:01 by anystrom          #+#    #+#             */
-/*   Updated: 2021/04/28 13:18:51 by anystrom         ###   ########.fr       */
+/*   Updated: 2021/05/01 00:01:30 by anystrom         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,7 +94,7 @@ t_uint32	*xbit_to_32(t_gfx gfx, int fd, int i, int b)
 	return ((t_uint32*)dummy);
 }
 
-t_gfx		read_bmp(char *file, int fd, int bread)
+t_gfx		read_bmp(const char *file, int fd, int bread)
 {
 	t_bmphead	bmp;
 	t_bmpinfo	head;

@@ -6,7 +6,7 @@
 /*   By: anystrom <anystrom@hive.fi>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/24 15:31:21 by anystrom          #+#    #+#             */
-/*   Updated: 2021/04/30 21:56:13 by anystrom         ###   ########.fr       */
+/*   Updated: 2021/05/01 00:43:43 by anystrom         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,10 +31,12 @@
 ** GPU predefine
 */
 # ifdef	SINGLE_PRECICION
-typedef	float	t_fpint;
+typedef	float		t_fpint;
+typedef int			t_int;
 #  define GPU_FP	"-DSINGLE_PRECICION=1"
 # else
-typedef	double	t_fpint;
+typedef	double		t_fpint;
+typedef long		t_int;
 #  define GPU_FP	"-DSINGLE_PRECICION=0"
 # endif
 
@@ -73,10 +75,10 @@ typedef struct	s_vector
 
 typedef struct	s_ivector
 {
-	int			x;
-	int			y;
+	t_int		x;
+	t_int		y;
 # ifdef			IS3D
-	int			z;
+	t_int		z;
 # endif
 }				t_ivector;
 
@@ -117,7 +119,8 @@ typedef struct			s_gpu
 	cl_kernel			kernel;
 	cl_mem				screen;	//uint32
 	cl_mem				render;	//t_render
-	cl_mem				area;	//area
+	cl_mem				area;	//char
+	cl_mem				gfx;	//uint32
 	size_t				local;
 	size_t				global;
 }						t_gpu;
@@ -135,7 +138,7 @@ typedef struct	s_wolf
 	t_chara		*chara;
 	int			height;
 	int			width;
-	void		(*cycle)(struct s_wolf*);
+	void		(*cycle)(struct s_wolf*, struct s_gpu*);
 	char		*syssmg[2];
 	int			cur;
 	int			sel;
@@ -196,7 +199,6 @@ char			*get_syssmgtwo(t_wolf *wlf, int pc);
 void			anim_shift(t_wolf *wlf, int frame);
 void			combat_key(int key, t_wolf *wlf);
 void			comp_foe(t_wolf *wlf, char *bpath, int i);
-void			comp_gfx(t_wolf *wolf, int i);
 void			comp_map(t_wolf *wolf, char *av);
 void			cur_two(t_wolf *wlf, int tar);
 void			cur_zero(t_wolf *wlf, int tar);
@@ -221,5 +223,6 @@ void			*destroy_gpu(t_gpu *gpu);
 void			copy_map_to_gpu(t_wolf *wlf);
 void			get_gpu_info(t_gpu *gpu, t_window *win);
 void			prep_gpu(t_wolf *wlf, t_gpu *gpu);
+cl_mem			comp_gfx(const char *file, t_gpu *gpu);
 
 #endif

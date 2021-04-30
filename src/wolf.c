@@ -6,7 +6,7 @@
 /*   By: anystrom <anystrom@hive.fi>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/24 15:01:06 by anystrom          #+#    #+#             */
-/*   Updated: 2021/04/30 22:07:25 by anystrom         ###   ########.fr       */
+/*   Updated: 2021/05/01 00:33:12 by anystrom         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,12 +18,6 @@
 void	wolf_default(t_wolf *wlf)
 {
 	wlf->flr = 0;
-	/*wlf->pos.x = 2.5;
-	wlf->pos.y = 2.5;
-	wlf->dir.x = 1.0;
-	wlf->dir.y = 0.0;
-	wlf->plane.x = 0.0;
-	wlf->plane.y = 0.66;*/
 	wlf->render = (t_render*)ft_memalloc(sizeof(t_render));
 	wlf->render->pos.x = 2.5;
 	wlf->render->pos.y = 2.5;
@@ -33,9 +27,9 @@ void	wolf_default(t_wolf *wlf)
 	wlf->render->plane.y = 0.66;
 	wlf->render->maxx = 1080;
 	wlf->render->maxy = 720;
-	wlf->render->texbool = 0;
-	wlf->rotsp = 0.001;
-	wlf->movsp = 0.04;
+	wlf->render->texbool = 1;
+	wlf->rotsp = 0.004;
+	wlf->movsp = 0.004;
 	wlf->rng = 0.0;
 	wlf->sbox = WINX / 2;
 	wlf->mxflr--;
@@ -43,7 +37,7 @@ void	wolf_default(t_wolf *wlf)
 	wlf->sel = -1;
 	wlf->plr = 0;
 	wlf->plrck = 0;
-	//wlf->cycle = &render;
+	wlf->cycle = &prep_gpu;
 	//wlf->chara = generate_party(wlf);
 	wlf->syssmg[0] = ft_strdup("You encountered a strong beast!");
 	wlf->syssmg[1] = ft_strdup("What will you do?");
@@ -87,10 +81,11 @@ void	setup(t_wolf *wlf)
 	
 	wolf_default(wlf);
 	init_window(wlf);
-	wlf->gpu = init_gpu(wlf->win);
-	copy_map_to_gpu(wlf);
+	wlf->gpu = init_gpu(wlf->win);	//GPU stuff after this point
 	if (!wlf->gpu)
 		error_out("GPU init not succesful", wlf);
+	copy_map_to_gpu(wlf);
+	wlf->gpu->gfx = comp_gfx("./gfx/graphics.bmp", wlf->gpu);
 	wlf->area[0][(int)wlf->render->pos.y][(int)wlf->render->pos.x] = 1;
 	start, now = SDL_GetTicks();
 	while (1)
