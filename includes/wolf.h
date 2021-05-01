@@ -6,7 +6,7 @@
 /*   By: anystrom <anystrom@hive.fi>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/24 15:31:21 by anystrom          #+#    #+#             */
-/*   Updated: 2021/05/01 14:42:12 by anystrom         ###   ########.fr       */
+/*   Updated: 2021/05/01 22:42:18 by anystrom         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,13 +31,13 @@
 ** GPU predefine
 */
 # ifdef	SINGLE_PRECICION
-typedef	float		t_fpint;
-typedef int			t_int;
-#  define GPU_FP	"-DSINGLE_PRECICION=1"
+typedef	float			t_fpint;
+typedef int				t_int;
+#  define GPU_FP		"-DSINGLE_PRECICION=1"
 # else
-typedef	double		t_fpint;
-typedef long		t_int;
-#  define GPU_FP	"-DSINGLE_PRECICION=0"
+typedef	double			t_fpint;
+typedef long			t_int;
+#  define GPU_FP		"-DSINGLE_PRECICION=0"
 # endif
 
 /*
@@ -52,63 +52,63 @@ typedef long		t_int;
 ** gfxid	= enemy only, what sprite should be used.
 */
 
-typedef struct	s_chara
+typedef struct			s_chara
 {
-	char		*name;
-	int			maxhp;
-	int			hp;
-	int			row;
-	int			action;
-	int			defend;
-	int			target;
-	int			gfxid;
-}				t_chara;
+	char				*name;
+	int					maxhp;
+	int					hp;
+	int					row;
+	int					action;
+	int					defend;
+	int					target;
+	int					gfxid;
+}						t_chara;
 
-typedef struct	s_vector
+typedef struct			s_vector
 {
-	t_fpint		x;
-	t_fpint		y;
+	t_fpint				x;
+	t_fpint				y;
 # ifdef			IS3D
-	t_fpint		z;
+	t_fpint				z;
 # endif
-}				t_vector;
+}						t_vector;
 
-typedef struct	s_ivector
+typedef struct			s_ivector
 {
-	t_int		x;
-	t_int		y;
+	t_int				x;
+	t_int				y;
 # ifdef			IS3D
-	t_int		z;
+	t_int				z;
 # endif
-}				t_ivector;
+}						t_ivector;
 
-typedef struct		s_window
+typedef struct			s_window
 {
-	t_uint32		wid;
-	t_uint32		hgt;
-	t_uint32		*pixels;
-	SDL_Surface		*surface;
-	SDL_Texture		*texture;
-	SDL_Window		*window;
-	SDL_Renderer	*render;
-}					t_window;
+	t_uint32			wid;
+	t_uint32			hgt;
+	t_uint32			*pixels;
+	SDL_Surface			*surface;
+	SDL_Texture			*texture;
+	SDL_Window			*window;
+	SDL_Renderer		*render;
+}						t_window;
 
-typedef struct		s_render
+typedef struct			s_render
 {
-	int				maxx;
-	int				maxy;
-	t_vector		pos;
-	t_vector		dir;
-	t_vector		plane;
-	char			texbool;
-}					t_render;
+	int					maxx;
+	int					maxy;
+	t_vector			pos;
+	t_vector			dir;
+	t_vector			plane;
+	char				texbool;
+}						t_render;
 
-typedef struct		s_gpuhandle
+typedef struct			s_gpuhandle
 {
-	cl_platform_id	platform_id;
-	cl_uint			ret_num_devices;
-	cl_uint			ret_num_platforms;
-}					t_gpuhandle;
+	cl_platform_id		platform_id;
+	cl_uint				ret_num_devices;
+	cl_uint				ret_num_platforms;
+}						t_gpuhandle;
 
 typedef struct			s_gpu
 {
@@ -131,6 +131,8 @@ typedef struct	s_wolf
 	t_render	*render;
 	t_gpu		*gpu;
 	SDL_Event	event;
+	SDL_Thread	*logic_thread;
+	SDL_mutex	*mutex;
 	int			tile;
 	t_gfx		*gfx;
 	int			gfxcount;
@@ -149,30 +151,30 @@ typedef struct	s_wolf
 	char		***area;
 	t_fpint		rng;
 	int			aggro;
-	int			hit;
-	int			side;
-	int			lineh;
-	int			start;
-	int			end;
-	int			texnum;
-	t_ivector	tex;
-	int			testcolor;
-	int			sbox;
-	t_ivector	cell;
-	t_ivector	t;
-	int			flrchange;
-	int			updown;
-	t_fpint		posz;
+	//int			hit;
+	//int			side;
+	//int			lineh;
+	//int			start;
+	//int			end;
+	//int			texnum;
+	//t_ivector	tex;
+	//int			testcolor;
+	//int			sbox;
+	//t_ivector	cell;
+	//t_ivector	t;
+	//int			flrchange;
+	//int			updown;
+	t_fpint		movsp;
+	t_fpint		rotsp;
+	/*t_fpint		posz;
 	t_vector	rayd0;
 	t_vector	rayd1;
 	t_fpint		rowdist;
 	t_vector	flstep;
 	t_vector	floor;
-	t_fpint		movsp;
-	t_fpint		rotsp;
 	t_fpint		rstep;
 	t_fpint		wallx;
-	t_fpint		texpos;
+	t_fpint		texpos;*/
 	int			isclick;
 	char		keys[SDL_NUM_SCANCODES];
 }				t_wolf;
@@ -224,5 +226,6 @@ void			copy_map_to_gpu(t_wolf *wlf);
 void			get_gpu_info(t_gpu *gpu, t_window *win);
 void			prep_gpu(t_wolf *wlf, t_gpu *gpu);
 cl_mem			comp_gfx(const char *file, t_gpu *gpu);
+void			create_logic(t_wolf *wlf);
 
 #endif

@@ -6,59 +6,12 @@
 /*   By: anystrom <anystrom@hive.fi>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/09 14:25:29 by anystrom          #+#    #+#             */
-/*   Updated: 2021/05/01 20:05:33 by anystrom         ###   ########.fr       */
+/*   Updated: 2021/05/01 23:31:47 by anystrom         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/wolf.h"
 #include "../includes/value.h"
-
-void		move_player(t_wolf *wlf)
-{
-	t_fpint	olddirx;
-	t_fpint	oldplanex;
-
-	if (wlf->keys[SDL_SCANCODE_UP])
-	{
-		wlf->render->pos.y += wlf->render->dir.y * wlf->movsp;
-		wlf->render->pos.x += wlf->render->dir.x * wlf->movsp;
-	}
-	if (wlf->keys[SDL_SCANCODE_DOWN])
-	{
-		wlf->render->pos.y -= wlf->render->dir.y * wlf->movsp;
-		wlf->render->pos.x -= wlf->render->dir.x * wlf->movsp;
-	}
-	if (wlf->keys[SDL_SCANCODE_LEFT])
-	{
-		olddirx = wlf->render->dir.x;
-		wlf->render->dir.x = wlf->render->dir.x * cos(-wlf->rotsp) - wlf->render->dir.y * sin(-wlf->rotsp);
-		wlf->render->dir.y = olddirx * sin(-wlf->rotsp) + wlf->render->dir.y * cos(-wlf->rotsp);
-		oldplanex = wlf->render->plane.x;
-		wlf->render->plane.x = wlf->render->plane.x * cos(-wlf->rotsp) - wlf->render->plane.y *
-				sin(-wlf->rotsp);
-		wlf->render->plane.y = oldplanex * sin(-wlf->rotsp) + wlf->render->plane.y *
-				cos(-wlf->rotsp);
-	}
-	if (wlf->keys[SDL_SCANCODE_RIGHT])
-	{
-		olddirx = wlf->render->dir.x;
-		wlf->render->dir.x = wlf->render->dir.x * cos(wlf->rotsp) - wlf->render->dir.y * sin(wlf->rotsp);
-		wlf->render->dir.y = olddirx * sin(wlf->rotsp) + wlf->render->dir.y * cos(wlf->rotsp);
-		oldplanex = wlf->render->plane.x;
-		wlf->render->plane.x = wlf->render->plane.x * cos(wlf->rotsp) - wlf->render->plane.y *
-				sin(wlf->rotsp);
-		wlf->render->plane.y = oldplanex * sin(wlf->rotsp) + wlf->render->plane.y *
-				cos(wlf->rotsp);
-	}
-	if (wlf->render->pos.y < 0)
-		wlf->render->pos.y = 25;
-	else if (wlf->render->pos.y > 25)
-		wlf->render->pos.y = 0;
-	if (wlf->render->pos.x < 0)
-		wlf->render->pos.x = 25;
-	else if (wlf->render->pos.x > 25)
-		wlf->render->pos.x = 0;
-}
 
 void		handle_keys(t_wolf *wlf)
 {
@@ -75,7 +28,6 @@ void		handle_keys(t_wolf *wlf)
 				wlf->keys[wlf->event.key.keysym.scancode] = 0;
 		}
 	}
-	move_player(wlf);
 }
 
 void		prep_gpu(t_wolf *wlf, t_gpu *gpu)
@@ -84,7 +36,9 @@ void		prep_gpu(t_wolf *wlf, t_gpu *gpu)
 	t_fpint	olddirx;
 	t_fpint	oldplanex;
 
+	SDL_LockMutex(wlf->mutex);
 	err = clEnqueueWriteBuffer(gpu->commands, gpu->render, CL_TRUE, 0, sizeof(t_render), wlf->render, 0, NULL, NULL);
+	SDL_UnlockMutex(wlf->mutex);
 	err |= clSetKernelArg(gpu->kernel, 0, sizeof(cl_mem), &gpu->screen);
 	err |= clSetKernelArg(gpu->kernel, 1, sizeof(cl_mem), &gpu->render);
 	err |= clSetKernelArg(gpu->kernel, 2, sizeof(cl_mem), &gpu->area);
@@ -98,6 +52,7 @@ void		prep_gpu(t_wolf *wlf, t_gpu *gpu)
 		printf("Code: %d\n", err);
 		error_out("Failed to execute kernel!", wlf);
 	}
+	SDL_Delay(14);
 	handle_keys(wlf);
 	clFinish(gpu->commands);
 	clEnqueueReadBuffer(gpu->commands, gpu->screen, CL_TRUE, 0, 

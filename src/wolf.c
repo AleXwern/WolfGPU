@@ -6,7 +6,7 @@
 /*   By: anystrom <anystrom@hive.fi>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/24 15:01:06 by anystrom          #+#    #+#             */
-/*   Updated: 2021/05/01 20:00:51 by anystrom         ###   ########.fr       */
+/*   Updated: 2021/05/01 23:29:10 by anystrom         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,10 +28,10 @@ void	wolf_default(t_wolf *wlf)
 	wlf->render->maxx = wlf->win->wid;
 	wlf->render->maxy = wlf->win->hgt;
 	wlf->render->texbool = 1;
-	wlf->rotsp = 0.004;
-	wlf->movsp = 0.004;
+	wlf->rotsp = 0.007;
+	wlf->movsp = 0.006;
 	wlf->rng = 0.0;
-	wlf->sbox = WINX / 2;
+	//wlf->sbox = WINX / 2;
 	wlf->mxflr--;
 	wlf->cur = 0;
 	wlf->sel = -1;
@@ -60,7 +60,7 @@ void	init_window(t_wolf *wlf)
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_TIMER))
 		error_out("SDL error", wlf);
 	if (!(win->window = SDL_CreateWindow("wolfGPU", SDL_WINDOWPOS_UNDEFINED,
-			SDL_WINDOWPOS_UNDEFINED, 1080, 720, SDL_WINDOW_FULLSCREEN_DESKTOP)))
+			SDL_WINDOWPOS_UNDEFINED, 1080, 720, 0 & SDL_WINDOW_FULLSCREEN_DESKTOP)))
 		error_out("Window error.", wlf);
 	if (!(win->render = SDL_CreateRenderer(win->window, -1, SDL_RENDERER_SOFTWARE)))
 		if (!(win->render = SDL_GetRenderer(win->window)))
@@ -88,6 +88,7 @@ void	setup(t_wolf *wlf)
 	copy_map_to_gpu(wlf);
 	wlf->gpu->gfx = comp_gfx("./gfx/graphics.bmp", wlf->gpu);
 	wlf->area[0][(int)wlf->render->pos.y][(int)wlf->render->pos.x] = 1;
+	create_logic(wlf);
 	start, now = SDL_GetTicks();
 	while (1)
 	{

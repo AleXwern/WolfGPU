@@ -6,7 +6,7 @@
 #    By: anystrom <anystrom@hive.fi>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/01/07 12:41:01 by anystrom          #+#    #+#              #
-#    Updated: 2021/05/01 01:01:16 by anystrom         ###   ########.fr        #
+#    Updated: 2021/05/01 22:41:38 by anystrom         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,13 +16,16 @@ FLG =
 SRCFILE = wolf.c fileformat.c gfx.c key_input.c render.c draw.c move.c randenc.c \
 			floor.c randkey.c interact.c util.c anim.c ai.c entity.c cursor.c \
 			bmp_reader.c
-SRCFILE = wolf.c fileformat.c gpu.c render.c bmp_reader.c gfx.c
+SRCFILE = wolf.c fileformat.c gpu.c render.c bmp_reader.c gfx.c game_logic.c
+DATAFILE = data.rc
 SRC = $(addprefix ./src/,$(SRCFILE))
 LIBFT = ./obj/libft.a
 OBJS = $(SRC:.c=.o)
 OBJ = $(addprefix ./obj/,$(SRCFILE:.c=.o))
+DATA = $(addprefix ./obj/,$(DATAFILE:.rc=.res))
 OBJDIR = ./obj/
 SRCDIR = ./src/
+DATADIR = ./gfx/
 INCL = -I ./libft \
 	-I ./includes \
 	-I C:\SDL\SDL2-2.0.12\include \
@@ -46,8 +49,12 @@ $(OBJDIR)%.o:$(SRCDIR)%.c
 	@echo "Compiling Wolf3D -> $(RED)$@$(STOP)"
 	@gcc $(FLG) $(INCL) -o $@ -c $<
 
-$(NAME): $(OBJ) $(LIBFT)
-	gcc $(FLG) $(INCL) -o $(NAME) $(OBJ) $(LIBFT) $(LIB)
+$(OBJDIR)%.res:$(DATADIR)%.rc
+	@echo "Compiling Wolf3D -> $(RED)$@$(STOP)"
+	windres $< -O coff -o $@
+
+$(NAME): $(OBJ) $(LIBFT) $(DATA)
+	gcc $(FLG) $(INCL) -o $(NAME) $(OBJ) $(DATA) $(LIBFT) $(LIB)
 	@echo Done.
 
 test:

@@ -6,7 +6,7 @@
 #    By: anystrom <anystrom@hive.fi>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/10/30 16:09:13 by anystrom          #+#    #+#              #
-#    Updated: 2021/04/18 17:15:16 by anystrom         ###   ########.fr        #
+#    Updated: 2021/05/01 22:27:54 by anystrom         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -39,15 +39,15 @@ all: $(NAME)
 
 #-Wall -Wextra -Werror
 %.o:%.c
-	gcc $(FLG) -I $(INCLS) -o $@ -c $<
-	echo "Compiling Libft -> $(GREEN)$@$(STOP)"
+	@gcc $(FLG) -I $(INCLS) -o $@ -c $<
+	@echo "Compiling Libft -> $(GREEN)$@$(STOP)"
 
 $(NAME): $(OBJS)
-	ar rc $(NAME) $(OBJS)
-	ranlib $(NAME)
-	echo "Compiled $(PURPLE)$(NAME)$(STOP)"
-	mv $(OBJS) ../obj
-	mv $(NAME) ../obj
+	@ar rc $(NAME) $(OBJS)
+	@ranlib $(NAME)
+	@echo "Compiled $(PURPLE)$(NAME)$(STOP)"
+	@mv $(OBJS) ../obj
+	@mv $(NAME) ../obj
 
 clean:
 	@/bin/rm -f $(addprefix $(OBJFLD),$(OBJS))
