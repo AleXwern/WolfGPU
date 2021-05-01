@@ -6,13 +6,13 @@
 #    By: anystrom <anystrom@hive.fi>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/01/07 12:41:01 by anystrom          #+#    #+#              #
-#    Updated: 2021/04/30 23:56:58 by anystrom         ###   ########.fr        #
+#    Updated: 2021/05/01 01:01:16 by anystrom         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 
 NAME = wolf3d
-FLG = -O3
+FLG =
 SRCFILE = wolf.c fileformat.c gfx.c key_input.c render.c draw.c move.c randenc.c \
 			floor.c randkey.c interact.c util.c anim.c ai.c entity.c cursor.c \
 			bmp_reader.c

@@ -88,11 +88,18 @@ t_gpu			*init_gpu(t_window *win)
 void	get_gpu_info(t_gpu *gpu, t_window *win)
 {
 	clGetKernelWorkGroupInfo(gpu->kernel, gpu->device_id, CL_KERNEL_WORK_GROUP_SIZE,
-		sizeof(gpu->local), &gpu->local, NULL);
+		sizeof(gpu->local), gpu->local, NULL);
 	//gpu->global = (win->wid + 31) & ~31;
-	gpu->global = 64;
-	while (gpu->global < win->wid)
-		gpu->global *= 2;
+	gpu->global[0] = 64;
+	while (gpu->global[0] < win->wid)
+		gpu->global[0] *= 2;
+	gpu->global[1] = 64;
+	while (gpu->global[1] < win->hgt)
+	// && gpu->global[1] < 1024)
+		gpu->global[1] *= 2;
+	gpu->local[1] = 4;
+	printf("Globals: %u %u\nLocals: %u %u\n", gpu->global[0], gpu->global[1], gpu->local[0], gpu->local[1]);
+	//exit(0);
 }
 
 void	*destroy_gpu(t_gpu *gpu)

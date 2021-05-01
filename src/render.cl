@@ -58,6 +58,7 @@ typedef struct		s_raycast
 	int				end;
 	int				side;
 	int				x;
+	int				y;
 	uint			color;
 	t_vector		pos;
 	t_fpint			camx;
@@ -72,7 +73,16 @@ typedef struct		s_draw
 {
 	int				texnum;
 	t_fpint			wallx;
+	t_fpint			pos;
+	t_fpint			posz;
+	t_fpint			rowdist;
 	t_ivector		tex;
+	t_vector		rayd0;
+	t_vector		rayd1;
+	t_vector		flstep;
+	t_vector		floor;
+	t_ivector		cell;
+	t_ivector		t;
 }					t_draw;
 
 //  ****************FUNCTIONS******************
@@ -93,10 +103,10 @@ void	ray_check(t_raycast *ray, __global char *area)
 			ray->map.y += ray->step.y;
 			ray->side = 1;
 		}
-		if (area[ray->map.y * 25 + ray->map.x] != 1)
-			break;
 		if (ray->map.y >= 25 || ray->map.x >= 25 ||
 			ray->map.y < 0 || ray->map.x < 0)
+			break;
+		if (area[ray->map.y * 25 + ray->map.x] != 1)
 			break;
 	}
 }
@@ -146,8 +156,6 @@ void	rc_init(t_raycast *ray, __global t_render *render, __global char *area, int
 	else
 		ray->walldist = (ray->map.y - ray->pos.y + (1 - ray->step.y) / 2) /
 				ray->rayd.y;
-	if (ray->walldist < 0.0001)
-		ray->walldist += 0.01;
 }
 
 uint	side_check(t_raycast *ray)
@@ -179,6 +187,7 @@ void			wall_stripe(
 {
 	t_draw		draw;
 
+	ray->start = ray->y;
 	if (render->texbool)
 	{
 		draw.texnum = area[ray->map.y * 25 + ray->map.x];
@@ -193,7 +202,8 @@ void			wall_stripe(
 		else if (ray->side % 2 == 1 && ray->rayd.y < 0)
 			draw.tex.x = IMAGEDIM - draw.tex.x - 1;
 	}
-	while (ray->start <= ray->end)
+	//while (ray->start <= ray->end)
+	if (1 == 1)
 	{
 		if (render->texbool)
 		{
@@ -202,7 +212,7 @@ void			wall_stripe(
 			if (draw.tex.y < 0)
 				draw.tex.y *= -1;
 			ray->color = gfx[
-				draw.tex.y % IMAGEDIM * SIZEL / 4 +
+				draw.tex.y % IMAGEDIM * DOUBLEDIM +
 				draw.tex.x % IMAGEDIM
 			];
 			if (ray->side > 1)
@@ -213,6 +223,36 @@ void			wall_stripe(
 	}
 }
 
+void			render_floor(
+		t_raycast *ray,
+		__global t_render *render,
+		__global uint *screen,
+		__global uint *gfx,
+		__global char *area)
+{
+	t_draw	draw;
+
+	ray->color = 0xff03B30A;
+	if (render->texbool)
+	{
+		draw.rayd0.x = render->dir.x - render->plane.x;
+		draw.rayd0.y = render->dir.y - render->plane.y;
+		draw.rayd1.x = render->dir.x + render->plane.x;
+		draw.rayd1.y = render->dir.y + render->plane.y;
+		draw.rowdist = (render->maxy * 0.5) / (ray->y - render->maxy / 2);
+		draw.flstep.x = draw.rowdist * (draw.rayd1.x - draw.rayd0.x) / render->maxx;
+		draw.flstep.y = draw.rowdist * (draw.rayd1.y - draw.rayd0.y) / render->maxx;
+		draw.floor.x = (render->pos.x + draw.rowdist * draw.rayd0.x) + (draw.flstep.x * ray->x);
+		draw.floor.y = (render->pos.y + draw.rowdist * draw.rayd0.y) + (draw.flstep.y * ray->x);
+		draw.cell.x = (int)draw.floor.x;
+		draw.cell.y = (int)draw.floor.y;
+		draw.t.x = (int)(IMAGEDIM * (draw.floor.x - draw.cell.x)) & (IMAGEDIM - 1);
+		draw.t.y = (int)(IMAGEDIM * (draw.floor.y - draw.cell.y)) & (IMAGEDIM - 1);
+		ray->color = gfx[(DOUBLEDIM * draw.t.y) + (draw.t.x + IMAGEDIM)];
+	}
+	screen[render->maxx * ray->y + ray->x] = ray->color;
+}
+
 __kernel void	render(
 		__global uint *screen, 
 		__global t_render *render, 
@@ -221,9 +261,13 @@ __kernel void	render(
 {
 	t_raycast	ray;
 	int			x;
+	int			y;
 
 	x = get_global_id(0);
 	if (x >= render->maxx)
+		return;
+	y = get_global_id(1);
+	if (y >= render->maxy)
 		return;
 	ray.pos = render->pos;
 	rc_init(&ray, render, area, x);
@@ -236,11 +280,13 @@ __kernel void	render(
 	if (ray.end >= render->maxy)
 		ray.end = render->maxy - 1;
 	ray.x = x;
-	for (int i = 0; i < ray.start; i++)	//ceiling
-		screen[i * render->maxx + x] = 0xff04EEFE;
-	wall_stripe(&ray, render, screen, gfx, area);
-	for (int i = ray.end; i < render->maxy; i++)	//ceiling
-		screen[i * render->maxx + x] = 0xff03B30A;
+	ray.y = y;
+	if (y < ray.start)	//ceiling
+		screen[y * render->maxx + x] = 0xff04EEFE;
+	else if (y > ray.end)	//floor
+		render_floor(&ray, render, screen, gfx, area);
+	else
+		wall_stripe(&ray, render, screen, gfx, area);
 }
 
 __kernel void square(__global float* input, __global float* output, const unsigned int count)

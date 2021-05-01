@@ -6,7 +6,7 @@
 /*   By: anystrom <anystrom@hive.fi>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/24 15:31:21 by anystrom          #+#    #+#             */
-/*   Updated: 2021/05/01 00:43:43 by anystrom         ###   ########.fr       */
+/*   Updated: 2021/05/01 14:42:12 by anystrom         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,8 +121,8 @@ typedef struct			s_gpu
 	cl_mem				render;	//t_render
 	cl_mem				area;	//char
 	cl_mem				gfx;	//uint32
-	size_t				local;
-	size_t				global;
+	size_t				local[2];
+	size_t				global[2];
 }						t_gpu;
 
 typedef struct	s_wolf

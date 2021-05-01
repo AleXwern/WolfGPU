@@ -6,7 +6,7 @@
 /*   By: anystrom <anystrom@hive.fi>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/09 14:25:29 by anystrom          #+#    #+#             */
-/*   Updated: 2021/05/01 00:02:30 by anystrom         ###   ########.fr       */
+/*   Updated: 2021/05/01 20:05:33 by anystrom         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,14 @@ void		move_player(t_wolf *wlf)
 		wlf->render->plane.y = oldplanex * sin(wlf->rotsp) + wlf->render->plane.y *
 				cos(wlf->rotsp);
 	}
+	if (wlf->render->pos.y < 0)
+		wlf->render->pos.y = 25;
+	else if (wlf->render->pos.y > 25)
+		wlf->render->pos.y = 0;
+	if (wlf->render->pos.x < 0)
+		wlf->render->pos.x = 25;
+	else if (wlf->render->pos.x > 25)
+		wlf->render->pos.x = 0;
 }
 
 void		handle_keys(t_wolf *wlf)
@@ -83,10 +91,13 @@ void		prep_gpu(t_wolf *wlf, t_gpu *gpu)
 	err |= clSetKernelArg(gpu->kernel, 3, sizeof(cl_mem), &gpu->gfx);
 	if (err != CL_SUCCESS)
 		error_out("Failed to set kernel arguments!", wlf);
-	err = clEnqueueNDRangeKernel(gpu->commands, gpu->kernel, 1,
-		NULL, &gpu->global, &gpu->local, 0, NULL, NULL);
+	err = clEnqueueNDRangeKernel(gpu->commands, gpu->kernel, 2,
+		NULL, gpu->global, gpu->local, 0, NULL, NULL);
 	if (err != CL_SUCCESS)
+	{
+		printf("Code: %d\n", err);
 		error_out("Failed to execute kernel!", wlf);
+	}
 	handle_keys(wlf);
 	clFinish(gpu->commands);
 	clEnqueueReadBuffer(gpu->commands, gpu->screen, CL_TRUE, 0, 

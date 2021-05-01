@@ -6,7 +6,7 @@
 /*   By: anystrom <anystrom@hive.fi>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/06 12:41:51 by anystrom          #+#    #+#             */
-/*   Updated: 2021/04/30 23:55:36 by anystrom         ###   ########.fr       */
+/*   Updated: 2021/05/01 14:18:59 by anystrom         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,5 +27,6 @@ cl_mem		comp_gfx(const char *file, t_gpu *gpu)
 		sizeof(Uint32) * image.wid * image.hgt, NULL, NULL);
 	clEnqueueWriteBuffer(gpu->commands, gpu_image, CL_TRUE, 0,
 		sizeof(Uint32) * image.wid * image.hgt, image.data, 0, NULL, NULL);
+	free(image.data);
 	return (gpu_image);
 }

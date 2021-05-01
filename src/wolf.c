@@ -6,7 +6,7 @@
 /*   By: anystrom <anystrom@hive.fi>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/24 15:01:06 by anystrom          #+#    #+#             */
-/*   Updated: 2021/05/01 00:33:12 by anystrom         ###   ########.fr       */
+/*   Updated: 2021/05/01 20:00:51 by anystrom         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,8 +25,8 @@ void	wolf_default(t_wolf *wlf)
 	wlf->render->dir.y = 0.0;
 	wlf->render->plane.x = 0.0;
 	wlf->render->plane.y = 0.66;
-	wlf->render->maxx = 1080;
-	wlf->render->maxy = 720;
+	wlf->render->maxx = wlf->win->wid;
+	wlf->render->maxy = wlf->win->hgt;
 	wlf->render->texbool = 1;
 	wlf->rotsp = 0.004;
 	wlf->movsp = 0.004;
@@ -45,8 +45,9 @@ void	wolf_default(t_wolf *wlf)
 
 void	error_out(char *msg, t_wolf *wlf)
 {
-	ft_putendl(msg);
+	destroy_gpu(wlf->gpu);
 	SDL_Quit();
+	ft_putendl(msg);
 	exit(0);
 }
 
@@ -56,12 +57,10 @@ void	init_window(t_wolf *wlf)
 	
 	if (!(win = (t_window*)ft_memalloc(sizeof(t_window))))
 		error_out(MEM_ERROR, wlf);
-	win->hgt = 720;
-	win->wid = 1080;
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_TIMER))
 		error_out("SDL error", wlf);
 	if (!(win->window = SDL_CreateWindow("wolfGPU", SDL_WINDOWPOS_UNDEFINED,
-			SDL_WINDOWPOS_UNDEFINED, win->wid, win->hgt, 0)))
+			SDL_WINDOWPOS_UNDEFINED, 1080, 720, SDL_WINDOW_FULLSCREEN_DESKTOP)))
 		error_out("Window error.", wlf);
 	if (!(win->render = SDL_CreateRenderer(win->window, -1, SDL_RENDERER_SOFTWARE)))
 		if (!(win->render = SDL_GetRenderer(win->window)))
@@ -71,6 +70,8 @@ void	init_window(t_wolf *wlf)
 	win->texture = SDL_CreateTextureFromSurface(win->render, win->surface);
 	win->pixels = (t_uint32*)win->surface->pixels;
 	wlf->win = win;
+	win->wid = win->surface->w;
+	win->hgt = win->surface->h;
 }
 
 void	setup(t_wolf *wlf)
@@ -79,8 +80,8 @@ void	setup(t_wolf *wlf)
 	Uint32	now;
 	Uint32	fps = 0;
 	
-	wolf_default(wlf);
 	init_window(wlf);
+	wolf_default(wlf);
 	wlf->gpu = init_gpu(wlf->win);	//GPU stuff after this point
 	if (!wlf->gpu)
 		error_out("GPU init not succesful", wlf);
@@ -90,7 +91,8 @@ void	setup(t_wolf *wlf)
 	start, now = SDL_GetTicks();
 	while (1)
 	{
-		prep_gpu(wlf, wlf->gpu);
+		//prep_gpu(wlf, wlf->gpu);
+		wlf->cycle(wlf, wlf->gpu);
 		fps++;
 		now = SDL_GetTicks();
 		if (now - start > 1000)
@@ -100,12 +102,6 @@ void	setup(t_wolf *wlf)
 			start = SDL_GetTicks();
 		}
 	}
-	/*mlx_hook(wlf->win, 2, 0, key_hold, wlf);
-	mlx_hook(wlf->win, 3, 0, key_release, wlf);
-	mlx_hook(wlf->win, 17, 0, x_press, wlf);
-	mlx_loop_hook(wlf->mlx, move, wlf);
-	wlf->cycle(wlf);
-	mlx_loop(wlf->mlx);*/
 }
 
 int			main(int ac, char **av)
