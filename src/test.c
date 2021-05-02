@@ -152,7 +152,7 @@ int main(int argc, char** argv)
         printf("Error: Failed to create a command commands!\n");
         return EXIT_FAILURE;
     }
-    int fd = open("./src/render.cl", O_RDONLY);
+    int fd = open("./src_gpu/render.cl", O_RDONLY);
     if (fd == -1)
         return 1;
     char    buff[201];
@@ -181,7 +181,7 @@ int main(int argc, char** argv)
 
     // Build the program executable
     //
-    err = clBuildProgram(program, 0, NULL, "-DSINGLE_PRECICION=0", NULL, NULL);
+    err = clBuildProgram(program, 0, NULL, "-DSINGLE_PRECICION=0 -I ./includes/", NULL, NULL);
     if (err != CL_SUCCESS)
     {
         size_t len;

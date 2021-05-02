@@ -6,12 +6,12 @@
 #    By: anystrom <anystrom@hive.fi>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/01/07 12:41:01 by anystrom          #+#    #+#              #
-#    Updated: 2021/05/01 22:41:38 by anystrom         ###   ########.fr        #
+#    Updated: 2021/05/02 00:45:27 by anystrom         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 
-NAME = wolf3d
+NAME = wolf3d.exe
 FLG =
 SRCFILE = wolf.c fileformat.c gfx.c key_input.c render.c draw.c move.c randenc.c \
 			floor.c randkey.c interact.c util.c anim.c ai.c entity.c cursor.c \
@@ -67,13 +67,14 @@ run: $(NAME)
 
 clean:
 	@echo "Removing Wolf3D libraries."
-	@/bin/rm -f $(OBJ)
+	@rm -f $(OBJ)
+	@rm -f $(DATA)
 	@echo Removing Libft libraries.
 	@make -C ./libft fclean
-	@/bin/rm -f test.exe
+	@rm -f test.exe
 
 fclean: clean
 	@echo Removing binaries.
-	@/bin/rm -f $(NAME)
+	@rm -f $(NAME)
 
 re: fclean all

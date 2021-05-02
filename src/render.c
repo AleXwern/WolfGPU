@@ -6,7 +6,7 @@
 /*   By: anystrom <anystrom@hive.fi>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/09 14:25:29 by anystrom          #+#    #+#             */
-/*   Updated: 2021/05/01 23:31:47 by anystrom         ###   ########.fr       */
+/*   Updated: 2021/05/02 13:55:32 by anystrom         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ void		prep_gpu(t_wolf *wlf, t_gpu *gpu)
 		printf("Code: %d\n", err);
 		error_out("Failed to execute kernel!", wlf);
 	}
-	SDL_Delay(14);
+	//SDL_Delay(14);
 	handle_keys(wlf);
 	clFinish(gpu->commands);
 	clEnqueueReadBuffer(gpu->commands, gpu->screen, CL_TRUE, 0, 

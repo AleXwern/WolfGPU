@@ -1,91 +1,16 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   render.cl                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: anystrom <anystrom@hive.fi>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/05/02 16:31:14 by anystrom          #+#    #+#             */
+/*   Updated: 2021/05/02 16:31:14 by anystrom         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-//	***************IMAGE SIZE*****************
-
-#ifndef	HIRES_GFX
-# define IMAGEDIM	256
-# define DOUBLEDIM	512
-# define DOUBLEWID	1024
-# define SIZEL		(256 * 8)
-#else
-# define IMAGEDIM	256
-# define DOUBLEDIM	512
-# define DOUBLEWID	1024
-# define SIZEL		(256 * 8)
-#endif
-
-//	***************STRUCTS*****************
-#if SINGLE_PRECICION == 1
-typedef	float		t_fpint;
-typedef int			t_int;
-#else
-typedef	double		t_fpint;
-typedef long		t_int;
-#endif
-
-typedef struct		s_vector
-{
-	t_fpint			x;
-	t_fpint			y;
-#ifdef			IS3D
-	t_fpint			z;
-#endif
-}					t_vector;
-
-typedef struct		s_ivector
-{
-	t_int			x;
-	t_int			y;
-#ifdef			IS3D
-	t_int			z;
-#endif
-}					t_ivector;
-
-typedef struct		s_render
-{
-	int				maxx;
-	int				maxy;
-	t_vector		pos;
-	t_vector		dir;
-	t_vector		plane;
-	char			texbool;
-}					t_render;
-
-typedef struct		s_raycast
-{
-	int				lineh;
-	t_fpint			walldist;
-	int				start;
-	int				end;
-	int				side;
-	int				x;
-	int				y;
-	uint			color;
-	t_vector		pos;
-	t_fpint			camx;
-	t_vector		rayd;
-	t_vector		delta;
-	t_vector		sided;
-	t_ivector		map;
-	t_ivector		step;
-}					t_raycast;
-
-typedef struct		s_draw
-{
-	int				texnum;
-	t_fpint			wallx;
-	t_fpint			pos;
-	t_fpint			posz;
-	t_fpint			rowdist;
-	t_ivector		tex;
-	t_vector		rayd0;
-	t_vector		rayd1;
-	t_vector		flstep;
-	t_vector		floor;
-	t_ivector		cell;
-	t_ivector		t;
-}					t_draw;
-
-//  ****************FUNCTIONS******************
+#include "gpu.h"
 
 void	ray_check(t_raycast *ray, __global char *area)
 {

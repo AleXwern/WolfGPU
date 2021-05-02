@@ -6,7 +6,7 @@
 /*   By: anystrom <anystrom@hive.fi>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/24 15:31:21 by anystrom          #+#    #+#             */
-/*   Updated: 2021/05/01 22:42:18 by anystrom         ###   ########.fr       */
+/*   Updated: 2021/05/02 16:41:45 by anystrom         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,21 +24,11 @@
 # include "get_next_line.h"
 # include "bmp.h"
 # include <stdio.h>
+# include "sync_data.h"
 
-/*
-** Do we want to use double or single precicion
-** The order needs to be given to GPU as well so we dynamically define the correct
-** GPU predefine
-*/
-# ifdef	SINGLE_PRECICION
-typedef	float			t_fpint;
-typedef int				t_int;
-#  define GPU_FP		"-DSINGLE_PRECICION=1"
-# else
-typedef	double			t_fpint;
-typedef long			t_int;
-#  define GPU_FP		"-DSINGLE_PRECICION=0"
-# endif
+//GPU program compile directives
+
+# define GPU_INCLUDES	"-I ./includes/ "
 
 /*
 ** Party member info
@@ -64,24 +54,6 @@ typedef struct			s_chara
 	int					gfxid;
 }						t_chara;
 
-typedef struct			s_vector
-{
-	t_fpint				x;
-	t_fpint				y;
-# ifdef			IS3D
-	t_fpint				z;
-# endif
-}						t_vector;
-
-typedef struct			s_ivector
-{
-	t_int				x;
-	t_int				y;
-# ifdef			IS3D
-	t_int				z;
-# endif
-}						t_ivector;
-
 typedef struct			s_window
 {
 	t_uint32			wid;
@@ -92,16 +64,6 @@ typedef struct			s_window
 	SDL_Window			*window;
 	SDL_Renderer		*render;
 }						t_window;
-
-typedef struct			s_render
-{
-	int					maxx;
-	int					maxy;
-	t_vector			pos;
-	t_vector			dir;
-	t_vector			plane;
-	char				texbool;
-}						t_render;
 
 typedef struct			s_gpuhandle
 {
@@ -151,30 +113,8 @@ typedef struct	s_wolf
 	char		***area;
 	t_fpint		rng;
 	int			aggro;
-	//int			hit;
-	//int			side;
-	//int			lineh;
-	//int			start;
-	//int			end;
-	//int			texnum;
-	//t_ivector	tex;
-	//int			testcolor;
-	//int			sbox;
-	//t_ivector	cell;
-	//t_ivector	t;
-	//int			flrchange;
-	//int			updown;
 	t_fpint		movsp;
 	t_fpint		rotsp;
-	/*t_fpint		posz;
-	t_vector	rayd0;
-	t_vector	rayd1;
-	t_fpint		rowdist;
-	t_vector	flstep;
-	t_vector	floor;
-	t_fpint		rstep;
-	t_fpint		wallx;
-	t_fpint		texpos;*/
 	int			isclick;
 	char		keys[SDL_NUM_SCANCODES];
 }				t_wolf;

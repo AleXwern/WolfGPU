@@ -20,7 +20,7 @@ static char		*compile_program(void)
 	int			fd;
 	int			bytes_read;
 
-	fd = open("./src/render.cl", O_RDONLY);
+	fd = open("./src_gpu/render.cl", O_RDONLY);
 	if (fd == -1)
 		return (NULL);
 	program = ft_strnew(1);
@@ -36,7 +36,16 @@ static char		*compile_program(void)
 	return (program);
 }
 
-void			*gpu_hint(const char *str)
+static char		*compile_args(void)
+{
+	char		*arg;
+
+	arg = ft_strjoin(GPU_INCLUDES, GPU_FP);
+	arg = ft_strfjoin(arg, GPU_3D);
+	return (arg);
+}
+
+static void		*gpu_hint(const char *str)
 {
 	ft_putendl(str);
 	return (NULL);
@@ -64,7 +73,9 @@ t_gpu			*init_gpu(t_window *win)
 	if (!(gpu->program = clCreateProgramWithSource(gpu->context, 1, (const char**)&source, NULL, &err)))
 		return (gpu_hint("GPU program could not be compiled!"));
 	free(source);
-	err = clBuildProgram(gpu->program, 0, NULL, GPU_FP, NULL, NULL);
+	source = compile_args();
+	err = clBuildProgram(gpu->program, 0, NULL, source, NULL, NULL);
+	free(source);
 	if (err)
 	{
 		printf("Code: %d: ", err);
