@@ -13,26 +13,35 @@
 #include "../includes/wolf.h"
 #include "../includes/value.h"
 
-static char		*compile_program(void)
+static char		**compile_program(void)
 {
-	char		*program;
+	char		**program;
+	char		*source;
 	char		buff[BUFF_SIZE + 1];
 	int			fd;
 	int			bytes_read;
+	char		sources[3][14] = {"render.cl", "draw_floor.cl", "draw_walls.cl"};
 
-	fd = open("./src_gpu/render.cl", O_RDONLY);
-	if (fd == -1)
-		return (NULL);
-	program = ft_strnew(1);
-	while (1)
+	program = (char**)malloc(sizeof(char*) * (SOURCE_COUNT + 1));
+	for (int i = 0; i < SOURCE_COUNT; i++)
 	{
-		ft_bzero(buff, BUFF_SIZE + 1);
-		bytes_read = read(fd, buff, BUFF_SIZE + 1);
-		buff[bytes_read] = 0;
-		program = ft_strfjoin(program, buff);
-		if (!bytes_read)
-			break;
+		source = ft_strjoin("./src_gpu/", sources[i]);
+		fd = open(source, O_RDONLY);
+		free(source);
+		if (fd == -1)
+			return (NULL);
+		program[i] = ft_strnew(1);
+		while (1)
+		{
+			bytes_read = read(fd, buff, BUFF_SIZE + 1);
+			buff[bytes_read] = 0;
+			program[i] = ft_strfjoin(program[i], buff);
+			if (!bytes_read)
+				break;
+		}
+		close(fd);
 	}
+	program[SOURCE_COUNT] = NULL;
 	return (program);
 }
 
@@ -51,12 +60,41 @@ static void		*gpu_hint(const char *str)
 	return (NULL);
 }
 
+void			test(t_gpu *gpu)	//this is to test saving kernel program binary to disk for later use
+{
+	size_t		n;
+	uint8_t		**bins;
+	char		name[] = "./bin/X.out";
+	
+	clGetProgramInfo(gpu->program, CL_PROGRAM_NUM_DEVICES, 0,NULL, &n);
+	size_t* sizes = (size_t*)malloc(sizeof(size_t) * n);
+	clGetProgramInfo(gpu->program, CL_PROGRAM_BINARY_SIZES, n*sizeof(size_t),sizes, NULL);
+	bins = (uint8_t**)malloc(sizeof(uint8_t*) * n);
+	for (int i = 0; i < n; i++)
+	{
+		printf("Prg %d - %u\n", i, sizes[i]);
+		bins[i] = (uint8_t*)malloc(sizes[i]);
+	}
+	clGetProgramInfo(gpu->program, CL_PROGRAM_BINARIES, n*sizeof(unsigned char*), bins, NULL);
+	for (int i = 0; i < n; i++)
+	{
+		name[6] = '0' + i;
+		int fd = open(name, O_WRONLY | O_BINARY | O_CREAT | O_TRUNC);
+		write(fd, bins[i], sizes[i]);
+		close(fd);
+		free(bins[i]);
+	}
+	free(bins);
+	free(sizes);
+}
+
 t_gpu			*init_gpu(t_window *win)
 {
 	t_gpuhandle	handle;
 	t_gpu		*gpu;
 	int			err;
-	char		*source;
+	char		**source;
+	char		*args;
 
 	if (!(gpu = (t_gpu*)malloc(sizeof(t_gpu))))
 		return (gpu_hint("Not enough memory!"));
@@ -70,15 +108,29 @@ t_gpu			*init_gpu(t_window *win)
 	if (!(gpu->commands = clCreateCommandQueue(gpu->context, gpu->device_id, 0, &err)))
 		return (gpu_hint("Command queue could not be created!"));
 	source = compile_program();
-	if (!(gpu->program = clCreateProgramWithSource(gpu->context, 1, (const char**)&source, NULL, &err)))
+	if (!(gpu->program = clCreateProgramWithSource(gpu->context, SOURCE_COUNT,
+			(const char**)source, NULL, &err)))
+	{
+		printf("Code: %d: ", err);
+		size_t len;
+		clGetProgramBuildInfo(gpu->program, gpu->device_id, CL_PROGRAM_BUILD_LOG, 0, NULL, &len);
+        char *buffer = (char*)malloc(len);
+        clGetProgramBuildInfo(gpu->program, gpu->device_id, CL_PROGRAM_BUILD_LOG, len, buffer, NULL);
+        printf("%s\n", buffer);
 		return (gpu_hint("GPU program could not be compiled!"));
-	free(source);
-	source = compile_args();
-	err = clBuildProgram(gpu->program, 0, NULL, source, NULL, NULL);
-	free(source);
+	}
+	ft_splitfree(source);
+	args = compile_args();
+	err = clBuildProgram(gpu->program, 0, NULL, args, NULL, NULL);
+	free(args);
 	if (err)
 	{
 		printf("Code: %d: ", err);
+		size_t len;
+		clGetProgramBuildInfo(gpu->program, gpu->device_id, CL_PROGRAM_BUILD_LOG, 0, NULL, &len);
+        char *buffer = (char*)malloc(len);
+        clGetProgramBuildInfo(gpu->program, gpu->device_id, CL_PROGRAM_BUILD_LOG, len, buffer, NULL);
+        printf("%s\n", buffer);
 		return (gpu_hint("GPU program could not be built!"));
 	}
 	gpu->kernel = clCreateKernel(gpu->program, "render", &err);
@@ -93,6 +145,7 @@ t_gpu			*init_gpu(t_window *win)
 	if (!gpu->screen | !gpu->render | !gpu->area)
 		return (gpu_hint("GPU_MEMALLOC issue!"));
 	get_gpu_info(gpu, win);
+	test(gpu);
 	return (gpu);
 }
 
