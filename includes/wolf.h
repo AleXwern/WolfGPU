@@ -6,7 +6,7 @@
 /*   By: anystrom <anystrom@hive.fi>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/24 15:31:21 by anystrom          #+#    #+#             */
-/*   Updated: 2021/05/02 16:41:45 by anystrom         ###   ########.fr       */
+/*   Updated: 2021/05/04 16:17:14 by anystrom         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,12 @@
 //GPU program compile directives
 
 # define GPU_INCLUDES	"-I ./includes/ "
+
+# ifdef	RENDER_VECTOR
+#  define	GPU_ENTRY	"render_vectors"
+# else
+#  define	GPU_ENTRY	"render"
+# endif
 
 /*
 ** Party member info
@@ -100,8 +106,6 @@ typedef struct	s_wolf
 	int			gfxcount;
 	t_gfx		img;
 	t_chara		*chara;
-	int			height;
-	int			width;
 	void		(*cycle)(struct s_wolf*, struct s_gpu*);
 	char		*syssmg[2];
 	int			cur;
@@ -109,8 +113,11 @@ typedef struct	s_wolf
 	int			plr;
 	int			plrck;
 	int			flr;
-	int			mxflr;
+#ifndef		RENDER_VECTOR
 	char		***area;
+#else
+	t_map		*area;
+#endif
 	t_fpint		rng;
 	int			aggro;
 	t_fpint		movsp;
@@ -167,5 +174,6 @@ void			get_gpu_info(t_gpu *gpu, t_window *win);
 void			prep_gpu(t_wolf *wlf, t_gpu *gpu);
 cl_mem			comp_gfx(const char *file, t_gpu *gpu);
 void			create_logic(t_wolf *wlf);
+size_t			comp_vec_map(t_wolf *wlf, char *av);
 
 #endif

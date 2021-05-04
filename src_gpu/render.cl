@@ -134,7 +134,7 @@ __kernel void	render(
 	if (y < ray.start)	//ceiling
 		screen[y * render->maxx + x] = 0xff04EEFE;
 	else if (y > ray.end)	//floor
-		render_floor(&ray, render, screen, gfx, area);
+		render_floor(&ray, render, screen, gfx);
 	else
 		wall_stripe(&ray, render, screen, gfx, area);
 }

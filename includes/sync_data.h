@@ -6,7 +6,7 @@
 /*   By: anystrom <anystrom@hive.fi>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/05/02 16:34:10 by anystrom          #+#    #+#             */
-/*   Updated: 2021/05/02 17:16:29 by anystrom         ###   ########.fr       */
+/*   Updated: 2021/05/04 00:26:33 by anystrom         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,10 +26,12 @@
 # if	SINGLE_PRECICION == 1
 typedef	float			t_fpint;
 typedef int				t_int;
+#  define FP_MAX		3.402823466e+38F
 #  define GPU_FP		"-DSINGLE_PRECICION=1 "
 # else
 typedef	double			t_fpint;
 typedef long			t_int;
+#  define FP_MAX		1.7976931348623158e+308
 #  define GPU_FP		"-DSINGLE_PRECICION=0 "
 # endif
 
@@ -64,10 +66,18 @@ typedef struct			s_ivector
 # endif
 }						t_ivector;
 
+typedef struct			s_map
+{
+	t_vector			p1;
+	t_vector			p2;
+}						t_map;
+
+
 typedef struct			s_render
 {
 	int					maxx;
 	int					maxy;
+	unsigned int		vectors;
 	t_vector			pos;
 	t_vector			dir;
 	t_vector			plane;

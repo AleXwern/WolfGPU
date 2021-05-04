@@ -6,7 +6,7 @@
 /*   By: anystrom <anystrom@hive.fi>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/24 15:01:06 by anystrom          #+#    #+#             */
-/*   Updated: 2021/05/01 23:29:10 by anystrom         ###   ########.fr       */
+/*   Updated: 2021/05/04 16:22:25 by anystrom         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,9 @@
 
 //printf("%s - %d\n", __FILE__, __LINE__);
 
-void	wolf_default(t_wolf *wlf)
+void	wolf_default(t_wolf *wlf, size_t vectors)
 {
-	wlf->flr = 0;
+	wlf->flr = 1;
 	wlf->render = (t_render*)ft_memalloc(sizeof(t_render));
 	wlf->render->pos.x = 2.5;
 	wlf->render->pos.y = 2.5;
@@ -25,14 +25,13 @@ void	wolf_default(t_wolf *wlf)
 	wlf->render->dir.y = 0.0;
 	wlf->render->plane.x = 0.0;
 	wlf->render->plane.y = 0.66;
+	wlf->render->vectors = vectors;
 	wlf->render->maxx = wlf->win->wid;
 	wlf->render->maxy = wlf->win->hgt;
 	wlf->render->texbool = 1;
 	wlf->rotsp = 0.007;
 	wlf->movsp = 0.006;
 	wlf->rng = 0.0;
-	//wlf->sbox = WINX / 2;
-	wlf->mxflr--;
 	wlf->cur = 0;
 	wlf->sel = -1;
 	wlf->plr = 0;
@@ -74,31 +73,30 @@ void	init_window(t_wolf *wlf)
 	win->hgt = win->surface->h;
 }
 
-void	setup(t_wolf *wlf)
+void	setup(t_wolf *wlf, size_t vectors)
 {
 	Uint32	start;
 	Uint32	now;
 	Uint32	fps = 0;
 	
 	init_window(wlf);
-	wolf_default(wlf);
+	wolf_default(wlf, vectors);
 	wlf->gpu = init_gpu(wlf->win);	//GPU stuff after this point
 	if (!wlf->gpu)
 		error_out("GPU init not succesful", wlf);
 	copy_map_to_gpu(wlf);
 	wlf->gpu->gfx = comp_gfx("./gfx/graphics.bmp", wlf->gpu);
-	wlf->area[0][(int)wlf->render->pos.y][(int)wlf->render->pos.x] = 1;
 	create_logic(wlf);
 	start, now = SDL_GetTicks();
 	while (1)
 	{
-		//prep_gpu(wlf, wlf->gpu);
 		wlf->cycle(wlf, wlf->gpu);
 		fps++;
 		now = SDL_GetTicks();
 		if (now - start > 1000)
 		{
 			printf("FPS: %u\n", fps);
+			//printf("Pos: %f %f\nDir: %f %f\n", wlf->render->pos.x, wlf->render->pos.y, wlf->render->dir.x, wlf->render->dir.y);
 			fps = 0;
 			start = SDL_GetTicks();
 		}
@@ -108,20 +106,16 @@ void	setup(t_wolf *wlf)
 int			main(int ac, char **av)
 {
 	t_wolf		wlf;
+	size_t		vectors = 0;
 
 	ft_bzero(&wlf, sizeof(t_wolf));
-	/*if (ac != 4)
-		error_out(USAGE, &wlf);
-	wlf.tile = ft_atoi(av[1]);
-	if (wlf.tile < 1 || wlf.tile > 6)
-		error_out(USAGE, &wlf);
-	wlf.mxflr = ft_atoi(av[2]);
-	if (wlf.mxflr < 1 || wlf.mxflr > 9)
-		error_out(USAGE, &wlf);*/
-	wlf.mxflr = 1;
-	comp_map(&wlf, "./map3d/");//av[3]);
-	//comp_gfx(&wlf, 0);
-	setup(&wlf);
+	//comp_map(&wlf, "./map3d/");
+#ifdef	RENDER_VECTOR
+	vectors = comp_vec_map(&wlf, *av);
+#else
+	comp_map(&wlf, "./map3d/");
+#endif
+	setup(&wlf, vectors);
 	error_out("fine", &wlf);
 	return (0);
 }

@@ -6,17 +6,17 @@
 #    By: anystrom <anystrom@hive.fi>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/01/07 12:41:01 by anystrom          #+#    #+#              #
-#    Updated: 2021/05/02 00:45:27 by anystrom         ###   ########.fr        #
+#    Updated: 2021/05/04 16:23:12 by anystrom         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 
 NAME = wolf3d.exe
-FLG =
+FLG = -DDOOM_RENDER=0
 SRCFILE = wolf.c fileformat.c gfx.c key_input.c render.c draw.c move.c randenc.c \
 			floor.c randkey.c interact.c util.c anim.c ai.c entity.c cursor.c \
 			bmp_reader.c
-SRCFILE = wolf.c fileformat.c gpu.c render.c bmp_reader.c gfx.c game_logic.c
+SRCFILE = wolf.c vector.c gpu.c render.c fileformat.c bmp_reader.c gfx.c game_logic.c
 DATAFILE = data.rc
 SRC = $(addprefix ./src/,$(SRCFILE))
 LIBFT = ./obj/libft.a
@@ -51,10 +51,10 @@ $(OBJDIR)%.o:$(SRCDIR)%.c
 
 $(OBJDIR)%.res:$(DATADIR)%.rc
 	@echo "Compiling Wolf3D -> $(RED)$@$(STOP)"
-	windres $< -O coff -o $@
+	@windres $< -O coff -o $@
 
 $(NAME): $(OBJ) $(LIBFT) $(DATA)
-	gcc $(FLG) $(INCL) -o $(NAME) $(OBJ) $(DATA) $(LIBFT) $(LIB)
+	@gcc $(FLG) $(INCL) -o $(NAME) $(OBJ) $(DATA) $(LIBFT) $(LIB)
 	@echo Done.
 
 test:

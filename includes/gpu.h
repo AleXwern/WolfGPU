@@ -62,7 +62,7 @@ typedef struct		s_draw
 	t_ivector		t;
 }					t_draw;
 
-void			render_floor(t_raycast *ray, __global t_render *render, __global uint *screen, __global uint *gfx, __global char *area);
+void			render_floor(t_raycast *ray, __global t_render *render, __global uint *screen, __global uint *gfx);
 void			wall_stripe(t_raycast *ray, __global t_render *render, __global uint *screen, __global uint *gfx, __global char *area);
 
 #endif

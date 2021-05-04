@@ -16,8 +16,7 @@ void			render_floor(
 		t_raycast *ray,
 		__global t_render *render,
 		__global uint *screen,
-		__global uint *gfx,
-		__global char *area)
+		__global uint *gfx)
 {
 	t_draw	draw;
 

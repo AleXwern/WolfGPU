@@ -6,7 +6,7 @@
 /*   By: anystrom <anystrom@hive.fi>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/07 13:24:47 by anystrom          #+#    #+#             */
-/*   Updated: 2021/05/03 13:19:39 by anystrom         ###   ########.fr       */
+/*   Updated: 2021/05/03 19:59:06 by anystrom         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,11 @@
 # define WINY		720
 # define MAXAGGRO	2100
 # define GFXCOUNT	23
-# define SOURCE_COUNT	3
+# define SOURCE_COUNT	4
+# define MAXWIDTH	25
+# define MAXHEIGHT	25
+# define MAXDEPTH	9
+# define VEC_DELIM	0x20636576
 
 /*
 ** Tagged keys.
@@ -75,26 +79,4 @@
 # define SLASH		75
 # define STAR		67
 
-/*
-** Keys for laptop if needed.
-** # define ESC		65307
-** # define KEY_R		15
-** # define KEY_C		99
-** # define KEY_T		116
-** # define KEY_ONE	18
-** # define KEY_TWO	19
-** # define KEY_TRE	20
-** # define KEY_FOU	21
-** # define SPACE		32
-** # define UP			65362
-** # define DOWN		65364
-** # define LEFT		65363
-** # define RIGHT		65361
-** # define SCR_UPH	4
-** # define SCR_DOWN	5
-** # define NUM_PLU	69
-** # define NUM_MIN	78
-** # define SLASH		75
-** # define STAR		67
-*/
 #endif

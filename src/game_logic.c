@@ -53,17 +53,16 @@ void		move_player(t_wolf *wlf)
 	if (wlf->keys[SDL_SCANCODE_T])
 	{
 		wlf->render->texbool = wlf->render->texbool ? 0 : 1;
-		wlf->keys[SDL_SCANCODE_RIGHT] = 0;
+		wlf->keys[SDL_SCANCODE_T] = 0;
 	}
-	if (wlf->render->pos.y < 0)
+	/*if (wlf->render->pos.y < 0)
 		wlf->render->pos.y = 25;
 	else if (wlf->render->pos.y > 25)
 		wlf->render->pos.y = 0;
 	if (wlf->render->pos.x < 0)
 		wlf->render->pos.x = 25;
 	else if (wlf->render->pos.x > 25)
-		wlf->render->pos.x = 0;
-	//printf("%d %d %d %d\n", wlf->keys[79], wlf->keys[80], wlf->keys[81], wlf->keys[82]);
+		wlf->render->pos.x = 0;*/
 }
 
 int		game_logic(void *ptr)

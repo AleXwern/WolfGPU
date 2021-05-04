@@ -20,7 +20,11 @@ static char		**compile_program(void)
 	char		buff[BUFF_SIZE + 1];
 	int			fd;
 	int			bytes_read;
-	char		sources[3][14] = {"render.cl", "draw_floor.cl", "draw_walls.cl"};
+	char		sources[SOURCE_COUNT][14] = {
+		"render.cl", 
+		"draw_floor.cl", 
+		"draw_walls.cl",
+		"render_vec.cl"};
 
 	program = (char**)malloc(sizeof(char*) * (SOURCE_COUNT + 1));
 	for (int i = 0; i < SOURCE_COUNT; i++)
@@ -51,6 +55,7 @@ static char		*compile_args(void)
 
 	arg = ft_strjoin(GPU_INCLUDES, GPU_FP);
 	arg = ft_strfjoin(arg, GPU_3D);
+	printf("Kernel args: %s\n", arg);
 	return (arg);
 }
 
@@ -63,23 +68,22 @@ static void		*gpu_hint(const char *str)
 void			test(t_gpu *gpu)	//this is to test saving kernel program binary to disk for later use
 {
 	size_t		n;
+	int			fd;
 	uint8_t		**bins;
+	size_t		*sizes;
 	char		name[] = "./bin/X.out";
 	
 	clGetProgramInfo(gpu->program, CL_PROGRAM_NUM_DEVICES, 0,NULL, &n);
-	size_t* sizes = (size_t*)malloc(sizeof(size_t) * n);
+	sizes = (size_t*)malloc(sizeof(size_t) * n);
 	clGetProgramInfo(gpu->program, CL_PROGRAM_BINARY_SIZES, n*sizeof(size_t),sizes, NULL);
 	bins = (uint8_t**)malloc(sizeof(uint8_t*) * n);
 	for (int i = 0; i < n; i++)
-	{
-		printf("Prg %d - %u\n", i, sizes[i]);
 		bins[i] = (uint8_t*)malloc(sizes[i]);
-	}
 	clGetProgramInfo(gpu->program, CL_PROGRAM_BINARIES, n*sizeof(unsigned char*), bins, NULL);
 	for (int i = 0; i < n; i++)
 	{
 		name[6] = '0' + i;
-		int fd = open(name, O_WRONLY | O_BINARY | O_CREAT | O_TRUNC);
+		fd = open(name, O_WRONLY | O_BINARY | O_CREAT | O_TRUNC, S_IREAD | S_IWRITE);
 		write(fd, bins[i], sizes[i]);
 		close(fd);
 		free(bins[i]);
@@ -133,16 +137,14 @@ t_gpu			*init_gpu(t_window *win)
         printf("%s\n", buffer);
 		return (gpu_hint("GPU program could not be built!"));
 	}
-	gpu->kernel = clCreateKernel(gpu->program, "render", &err);
+	gpu->kernel = clCreateKernel(gpu->program, GPU_ENTRY, &err);
 	if (!gpu->kernel || err != CL_SUCCESS)
 		return (gpu_hint("Kernel could not be created!"));
 	gpu->screen = clCreateBuffer(gpu->context, CL_MEM_READ_WRITE,
 		sizeof(Uint32) * win->wid * win->hgt, NULL, NULL);
 	gpu->render = clCreateBuffer(gpu->context, CL_MEM_READ_WRITE,
 		sizeof(t_render), NULL, NULL);
-	gpu->area = clCreateBuffer(gpu->context, CL_MEM_READ_WRITE,
-		625, NULL, NULL);
-	if (!gpu->screen | !gpu->render | !gpu->area)
+	if (!gpu->screen | !gpu->render)
 		return (gpu_hint("GPU_MEMALLOC issue!"));
 	get_gpu_info(gpu, win);
 	test(gpu);
@@ -163,7 +165,6 @@ void	get_gpu_info(t_gpu *gpu, t_window *win)
 		gpu->global[1] *= 2;
 	gpu->local[1] = 4;
 	printf("Globals: %u %u\nLocals: %u %u\n", gpu->global[0], gpu->global[1], gpu->local[0], gpu->local[1]);
-	//exit(0);
 }
 
 void	*destroy_gpu(t_gpu *gpu)
@@ -180,19 +181,25 @@ void	*destroy_gpu(t_gpu *gpu)
 
 void		copy_map_to_gpu(t_wolf *wlf)
 {
-	char	map[25][25];
+#ifdef	RENDER_VECTOR
+	wlf->gpu->area = clCreateBuffer(wlf->gpu->context, CL_MEM_READ_WRITE,
+		sizeof(t_map) * wlf->render->vectors, NULL, NULL);
+	clEnqueueWriteBuffer(wlf->gpu->commands, wlf->gpu->area, CL_TRUE, 0,
+			sizeof(t_map) * wlf->render->vectors, wlf->area, 0, NULL, NULL);
+#else
+	char	map[MAXHEIGHT][MAXWIDTH];
 	int		i;
 
+	wlf->gpu->area = clCreateBuffer(wlf->gpu->context, CL_MEM_READ_WRITE,
+		MAXWIDTH * MAXHEIGHT, NULL, NULL);
 	ft_bzero(map, sizeof(map));
-	while (i < wlf->height)
+	while (i < MAXHEIGHT)
 	{
-		ft_memcpy(map[i], wlf->area[wlf->flr][i], wlf->width);
+		ft_memcpy(map[i], wlf->area[wlf->flr][i], MAXWIDTH);
 		i++;
 	}
-	printf("%s - %d\n", __FILE__, __LINE__);
-	printf("%p\n", wlf->gpu);
 	for (int i = 0; i < 25; i++)
-		clEnqueueWriteBuffer(wlf->gpu->commands, wlf->gpu->area, CL_TRUE, 25 * i,
-			25, map[i], 0, NULL, NULL);
-	printf("%s - %d\n", __FILE__, __LINE__);
+		clEnqueueWriteBuffer(wlf->gpu->commands, wlf->gpu->area, CL_TRUE, MAXHEIGHT * i,
+			MAXWIDTH, map[i], 0, NULL, NULL);
+#endif
 }
